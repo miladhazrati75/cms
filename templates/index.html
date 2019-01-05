@@ -1,0 +1,14 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Welcome</title>
+</head>
+<body>
+{% if 'username' not in session:%}
+<a href='/login'>Login</a><br>
+{% endif%}
+<a href="#">Register</a><br>
+
+</body>
+</html>
