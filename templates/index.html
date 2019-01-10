@@ -1,14 +1,17 @@
-<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <title>Welcome</title>
 </head>
 <body>
-{% if 'username' not in session:%}
-<a href='/login'>Login</a><br>
+{% if 'username' in session:%}
+<p>Hello, {{session['username']}}</p>
 {% endif%}
+{%if 'logged' not in session:%}
 <a href="#">Register</a><br>
-
+<a href='/login'>Login</a><br>
+{%else:%}
+<a href="/Logout">LogOut</a>
+{%endif%}
 </body>
 </html>
