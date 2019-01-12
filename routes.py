@@ -20,6 +20,14 @@ class User(db.Model):
     password = db.Column(db.String(40), unique=True)
     name = db.Column(db.String(40), unique=True)
 
+class Post(db.Model):
+    __tablename__ = 'posts'
+    pid = db.Column(db.Integer, primary_key=True)
+    uid = db.Column(db.Integer, primary_key=True)
+    title = db.Column(db.String(40), unique=True)
+    body = db.Column(db.String, unique=True)
+    #name = db.Column(db.String(40), unique=True)
+
 
 @app.route('/')
 def home():
@@ -45,6 +53,7 @@ def login():
         session['name'] = qlogin.name
         session['logged'] = True
         session['msg'] = 'Successful login.'
+        session['uid'] = qlogin.uid
     return render_template('index.html', msg=session)
 
 
@@ -69,10 +78,12 @@ def register():
     h = User(username=user, password=pwd, name=name)
     db.session.add(h)
     db.session.commit()
+    qedit = User.query.filter(User.username == request.form['user']).first()
     session['username'] = user
     session['logged'] = True
     session['name'] = request.form['name']
     session['msg'] = 'success!'
+    session['uid'] = qedit.uid
     return render_template('index.html', msg=session)
 
 
@@ -98,6 +109,33 @@ def edit_profile():
     session['msg'] = 'Edit Done.'
     session['logged'] = True
     return render_template('index.html', msg=session)
+
+@app.route('/Posts')
+def show_posts():
+    qpost = Post.query.filter(Post.uid == session['uid']).limit(5).all()
+    title = []
+    for i in range(0,5):
+        try:
+            title.append(qpost[i].title)
+        except IndexError:
+            continue
+
+        #author = session['name']
+        #body = qpost.body
+    return render_template('posts.html', post=title)
+
+@app.route('/NewPost')
+def show_new_post():
+    session['form'] = 'post'
+    return render_template('posts.html', post=session)
+
+@app.route('/ValidatePost', methods=['GET','POST'])
+def new_post():
+    post = Post(title=request.form['title'], body=request.form['body'], uid=session['uid'])
+    db.session.add(post)
+    db.session.commit()
+    session['form'] = ''
+    return redirect('/Posts')
 
 
 if __name__ == '__main__':

@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Posts</title>
+</head>
+<body>
+{%if session['form'] == 'post':%}
+<form action="/ValidatePost" method="post">
+    Title:
+    <input type="text" name="title" ><br>
+    Body:
+    <input type="textarea" name="body"><br>
+    <input type="submit" name="submit" value="Post!">
+</form>
+{%else:%}
+{%for i in range(0,5):%}
+<p>{{post[i]}}</p>
+{%endfor%}
+<a href="/NewPost">New Post</a>
+
+{%endif%}
+</body>
+</html>
