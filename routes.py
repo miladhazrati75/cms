@@ -1,28 +1,24 @@
+import binascii
+import hashlib
+import os
+from flask_sqlalchemy import SQLAlchemy
 from flask import *
-import os, binascii, hashlib
-from sqlalchemy.ext.declarative import declarative_base
-from sqlalchemy import Column, Integer, String
-from sqlalchemy import create_engine
-from sqlalchemy.orm import sessionmaker
 
 app = Flask(__name__)
 
 app.secret_key = binascii.hexlify(os.urandom(32))
 
-Base = declarative_base()
+app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///cms.db'
+
+db = SQLAlchemy(app)
 
 
-class User(Base):
+class User(db.Model):
     __tablename__ = 'users'
-    uid = Column(Integer, primary_key=True)
-    username = Column(String, unique=True)
-    password = Column(String, unique=True)
-    name = Column(String, unique=True)
-
-
-engine = create_engine('sqlite:///cms.db', echo=True)
-sessdb = sessionmaker(bind=engine)
-s = sessdb()
+    uid = db.Column(db.Integer, primary_key=True)
+    username = db.Column(db.String(40), unique=True)
+    password = db.Column(db.String(40), unique=True)
+    name = db.Column(db.String(40), unique=True)
 
 
 @app.route('/')
@@ -40,16 +36,16 @@ def show_login():
 def login():
     user = request.form['user']
     pwd = hashlib.sha1(request.form['pass'].encode('utf-8')).hexdigest()
-    q = s.query(User).filter(User.username == user, User.password == pwd).first()
-    if q is None:
-        msg = 'Login Failed.'
+    qlogin = User.query.filter(User.username == user, User.password == pwd).first()
+    if qlogin is None:
+        session['msg'] = 'Login Failed.'
     else:
-        q = s.query(User).filter(User.username == user, User.password == pwd).first()
-        session['username'] = q.username
-        session['name'] = q.name
+        qlogin = User.query.filter(User.username == user, User.password == pwd).first()
+        session['username'] = qlogin.username
+        session['name'] = qlogin.name
         session['logged'] = True
-        msg = 'Successful login.'
-    return render_template('index.html', msg=msg)
+        session['msg'] = 'Successful login.'
+    return render_template('index.html', msg=session)
 
 
 @app.route('/Logout')
@@ -71,12 +67,37 @@ def register():
     pwd = hashlib.sha1(request.form['pass'].encode('utf-8')).hexdigest()
     name = request.form['name']
     h = User(username=user, password=pwd, name=name)
-    s.add(h)
-    s.commit()
+    db.session.add(h)
+    db.session.commit()
     session['username'] = user
     session['logged'] = True
-    msg = 'success!'
-    return render_template('index.html', msg=msg)
+    session['name'] = request.form['name']
+    session['msg'] = 'success!'
+    return render_template('index.html', msg=session)
+
+
+@app.route('/EditProfile')
+def show_edit_profile():
+    user = session['username']
+    qfetchedit = User.query.filter(User.username == user).first()
+    user = qfetchedit.username
+    name = qfetchedit.name
+    session['form'] = 'edit'
+    return render_template('auth.html', edit=(user, name))
+
+
+@app.route('/ValidateEdit', methods=['GET', 'POST'])
+def edit_profile():
+    qedit = User.query.filter(User.username == session['username']).first()
+    qedit.username = request.form['user']
+    pwd = hashlib.sha1(request.form['pass'].encode('utf-8')).hexdigest()
+    qedit.name = request.form['name']
+    db.session.commit()
+    session['username'] = request.form['user']
+    session['name'] = request.form['name']
+    session['msg'] = 'Edit Done.'
+    session['logged'] = True
+    return render_template('index.html', msg=session)
 
 
 if __name__ == '__main__':

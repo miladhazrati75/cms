@@ -17,7 +17,7 @@
     <input type="text" name="pass"><br>
     <input type="submit" name="submit" value="login!">
 </form>
-{%else:%}
+{%elif session['form'] == 'register':%}
 <form action="/ValidateRegister" method="post">
     UserName:
     <input type="text" name="user"><br>
@@ -25,6 +25,16 @@
     <input type="text" name="pass"><br>
     Name:
     <input type="text" name="name"><br>
+    <input type="submit" name="submit" value="register!">
+</form>
+{%elif session['form'] == 'edit':%}
+<form action="/ValidateEdit" method="post">
+    UserName:
+    <input type="text" name="user" placeholder={{edit[0]}}><br>
+    Pass:
+    <input type="text" name="pass"><br>
+    Name:
+    <input type="text" name="name" placeholder={{edit[1]}}><br>
     <input type="submit" name="submit" value="register!">
 </form>
 {%endif%}
