@@ -4,12 +4,15 @@
     <title>Welcome</title>
 </head>
 <body>
+
 {% if 'msg' in session :%}
-{{session['msg']}}
+<p>{{session['msg']}}</p>
 {%endif%}
+
 {% if 'username' in session :%}
 <p>Hello, {{session['name']}}</p>
 {% endif%}
+
 {%if 'logged' not in session:%}
 <a href="/Register">Register</a><br>
 <a href='/Login'>Login</a><br>
@@ -18,5 +21,6 @@
 <a href="/EditProfile">Edit Profile</a>
 <a href="/Logout">LogOut</a>
 {%endif%}
+
 </body>
 </html>

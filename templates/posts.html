@@ -1,10 +1,13 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" xmlns="http://www.w3.org/1999/html">
 <head>
     <meta charset="UTF-8">
     <title>Posts</title>
 </head>
-<body>
+{%if 'msg' in session:%}
+<p>{{session['msg']}}</p>
+{%endif%}
+
 {%if session['form'] == 'post':%}
 <form action="/ValidatePost" method="post">
     Title:
@@ -14,11 +17,11 @@
     <input type="submit" name="submit" value="Post!">
 </form>
 {%else:%}
-{%for i in range(0,5):%}
-<p>{{post[i]}}</p>
+{%for i in range(post|length):%}
+<p><a href={{url_for('show_post',title=post[i])}}>{{post[i]}}</a></p>
+<p><a href={{url_for('delete_post',title=post[i])}}>Delete</a></p>
 {%endfor%}
 <a href="/NewPost">New Post</a>
-
 {%endif%}
 </body>
 </html>
